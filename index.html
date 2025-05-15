@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图片画廊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .gallery-title {
+            text-align: center;
+            font-size: 2.5em;
+            color: #333;
+            margin: 40px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-image {
+            transform: scale(1.1);
+        }
+
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .image-desc {
+            font-size: 0.9em;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        /* 灯箱样式 */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="gallery-title">图片画廊</h1>
+    <div class="container">
+        <div class="gallery-grid">
+            <!-- 图片项示例 - 重复这个结构添加更多图片 -->
+            <div class="gallery-item">
+                <img src="https://picsum.photos/300/250?random=1" alt="示例图片 1" class="gallery-image">
+                <div class="image-overlay">
+                    <h3 class="image-title">图片标题</h3>
+                    <p class="image-desc">这里是图片的简要描述文字，说明图片内容。</p>
+                </div>
+            </div>
+            <!-- 添加更多图片项 -->
+        </div>
+    </div>
+
+    <!-- 灯箱 -->
+    <div class="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="放大视图">
+    </div>
+
+    <script>
+        // 添加点击图片打开灯箱功能
+        document.querySelectorAll('.gallery-image').forEach(img => {
+            img.addEventListener('click', (e) => {
+                document.getElementById('lightbox-img').src = e.target.src
+                document.querySelector('.lightbox').style.display = 'flex'
+            })
+        })
+
+        function closeLightbox() {
+            document.querySelector('.lightbox').style.display = 'none'
+        }
+
+        // 动态加载更多图片（示例）
+        window.addEventListener('DOMContentLoaded', () => {
+            const galleryGrid = document.querySelector('.gallery-grid')
+            for(let i = 2; i <= 12; i++) {
+                const newItem = document.createElement('div')
+                newItem.className = 'gallery-item'
+                newItem.innerHTML = `
+                    <img src="https://picsum.photos/300/250?random=${i}" alt="示例图片 ${i}" class="gallery-image">
+                    <div class="image-overlay">
+                        <h3 class="image-title">图片 ${i}</h3>
+                        <p class="image-desc">示例图片描述文字 ${i}</p>
+                    </div>
+                `
+                galleryGrid.appendChild(newItem)
+            }
+        })
+    </script>
+</body>
+</html>
