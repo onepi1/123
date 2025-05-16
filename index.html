@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>图片画廊</title>
+    <title>图片</title>
     <style>
+        :root {
+            --primary-color: #ff6b6b;
+            --secondary-color: #4ecdc4;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,54 +17,95 @@
         }
 
         body {
-            background-color: #f5f5f5;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 2rem;
         }
 
-        .gallery-title {
+        .header {
             text-align: center;
-            font-size: 2.5em;
-            color: #333;
-            margin: 40px 0;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            margin: 3rem 0;
+            position: relative;
         }
 
-        .gallery-grid {
+        .title {
+            font-size: 3.5rem;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 2px;
+            animation: titleFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes titleFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .filters {
+            margin: 2rem 0;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 2rem;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: #fff;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+
+        .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
         }
 
         .gallery-item {
             position: relative;
+            border-radius: 15px;
             overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
+            transform-style: preserve-3d;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
 
         .gallery-item:hover {
-            transform: translateY(-5px);
+            transform: perspective(1000px) rotateX(5deg) rotateY(5deg) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
         }
 
-        .gallery-image {
+        .gallery-item:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .gallery-img {
             width: 100%;
-            height: 250px;
+            height: 350px;
             object-fit: cover;
             display: block;
             transition: transform 0.3s ease;
-        }
-
-        .gallery-item:hover .gallery-image {
-            transform: scale(1.1);
         }
 
         .image-overlay {
@@ -68,115 +114,215 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
-        }
-
-        .gallery-item:hover .image-overlay {
-            opacity: 1;
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
         }
 
         .image-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
+            color: #fff;
+            font-size: 1.2rem;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
         }
 
-        .image-desc {
-            font-size: 0.9em;
-            text-align: center;
-            padding: 0 20px;
+        .gallery-item:hover .image-title {
+            transform: translateY(0);
         }
 
-        /* 灯箱样式 */
-        .lightbox {
+        /* 全屏模态框 */
+        .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 999;
-            justify-content: center;
-            align-items: center;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            touch-action: none;
         }
 
-        .lightbox img {
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             max-width: 90%;
-            max-height: 90%;
-            border-radius: 10px;
+            max-height: 90vh;
+            transition: transform 0.3s ease;
         }
 
+        .navigation {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .navigation:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .prev { left: 2rem; }
+        .next { right: 2rem; }
+
+        /* 响应式设计 */
         @media (max-width: 768px) {
-            .gallery-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 480px) {
-            .gallery-grid {
-                grid-template-columns: 1fr;
-            }
+            .title { font-size: 2.5rem; }
+            .gallery { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+            .gallery-img { height: 300px; }
+            .navigation { width: 40px; height: 40px; }
         }
     </style>
 </head>
 <body>
-    <h1 class="gallery-title">图片画廊</h1>
-    <div class="container">
-        <div class="gallery-grid">
-            <!-- 图片项示例 - 重复这个结构添加更多图片 -->
-            <div class="gallery-item">
-                <img src="https://picsum.photos/300/250?random=1" alt="示例图片 1" class="gallery-image">
-                <div class="image-overlay">
-                    <h3 class="image-title">图片标题</h3>
-                    <p class="image-desc">这里是图片的简要描述文字，说明图片内容。</p>
-                </div>
-            </div>
-            <!-- 添加更多图片项 -->
+<div class="container">
+    <header class="header">
+        <h1 class="title">图片</h1>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="all">全部</button>
+            <button class="filter-btn" data-filter="nature">1</button>
+            <button class="filter-btn" data-filter="tech">2</button>
+            <button class="filter-btn" data-filter="city">3</button>
         </div>
+    </header>
+
+    <div class="gallery" id="gallery">
+        <!-- 图片通过JavaScript动态加载 -->
     </div>
+</div>
 
-    <!-- 灯箱 -->
-    <div class="lightbox" onclick="closeLightbox()">
-        <img id="lightbox-img" src="" alt="放大视图">
-    </div>
+<!-- 全屏模态框 -->
+<div class="modal" id="modal">
+    <div class="navigation prev" onclick="changeSlide(-1)">❮</div>
+    <img class="modal-content" id="modalImg">
+    <div class="navigation next" onclick="changeSlide(1)">❯</div>
+</div>
 
-    <script>
-        // 添加点击图片打开灯箱功能
-        document.querySelectorAll('.gallery-image').forEach(img => {
-            img.addEventListener('click', (e) => {
-                document.getElementById('lightbox-img').src = e.target.src
-                document.querySelector('.lightbox').style.display = 'flex'
-            })
-        })
+<script>
+    // 图片数据
+    const images = [
+        { src: 'image/photo1.jpg', category: 'nature', title: '' },
+        { src: 'image/photo2.jpg', category: 'tech', title: '' },
+        { src: 'image/photo3.jpg', category: 'city', title: '' },
+        { src: 'image/photo4.jpg', category: 'nature', title: '' },
+        { src: 'image/photo5.jpg', category: 'tech', title: '' },
+        { src: 'image/photo6.jpg', category: 'city', title: '' },
+        { src: 'image/photo7.jpg', category: 'nature', title: '' },
+        { src: 'image/photo8.jpg', category: 'tech', title: '' },
+        { src: 'image/photo9.jpg', category: 'city', title: '' },
+        { src: 'image/photo10.jpg', category: 'nature', title: '' },
+        { src: 'image/photo11.jpg', category: 'tech', title: '' },
+        { src: 'image/photo12.jpg', category: 'city', title: '' }
+    ];
 
-        function closeLightbox() {
-            document.querySelector('.lightbox').style.display = 'none'
-        }
+    let currentIndex = 0;
+    const modal = document.getElementById('modal');
+    const modalImg = document.getElementById('modalImg');
 
-        // 动态加载更多图片（示例）
-        window.addEventListener('DOMContentLoaded', () => {
-            const galleryGrid = document.querySelector('.gallery-grid')
-            for(let i = 2; i <= 12; i++) {
-                const newItem = document.createElement('div')
-                newItem.className = 'gallery-item'
-                newItem.innerHTML = `
-                    <img src="https://picsum.photos/300/250?random=${i}" alt="示例图片 ${i}" class="gallery-image">
+    // 初始化画廊
+    function initGallery() {
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = images.map(img => `
+                <div class="gallery-item" data-category="${img.category}">
+                    <img src="${img.src}" class="gallery-img" alt="${img.title}">
                     <div class="image-overlay">
-                        <h3 class="image-title">图片 ${i}</h3>
-                        <p class="image-desc">示例图片描述文字 ${i}</p>
+                        <h3 class="image-title">${img.title}</h3>
                     </div>
-                `
-                galleryGrid.appendChild(newItem)
+                </div>
+            `).join('');
+    }
+
+    // 过滤图片
+    function filterGallery(filter) {
+        const items = document.querySelectorAll('.gallery-item');
+        items.forEach(item => {
+            item.style.display = filter === 'all' || item.dataset.category === filter
+                ? 'block'
+                : 'none';
+        });
+    }
+
+    // 全屏查看
+    function openModal(index) {
+        currentIndex = index;
+        modal.style.display = 'block';
+        modalImg.src = images[currentIndex].src;
+        document.body.style.overflow = 'hidden';
+    }
+
+    // 切换图片
+    function changeSlide(direction) {
+        currentIndex = (currentIndex + direction + images.length) % images.length;
+        modalImg.src = images[currentIndex].src;
+        modalImg.style.animation = 'none';
+        setTimeout(() => {
+            modalImg.style.animation = 'slide 0.5s ease';
+        }, 10);
+    }
+
+    // 事件监听
+    document.addEventListener('DOMContentLoaded', () => {
+        initGallery();
+
+        // 过滤按钮
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filterGallery(this.dataset.filter);
+            });
+        });
+
+        // 图片点击
+        document.querySelectorAll('.gallery-item').forEach((item, index) => {
+            item.addEventListener('click', () => openModal(index));
+        });
+
+        // 关闭模态框
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal || e.target === modalImg) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
             }
-        })
-    </script>
+        });
+
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            if (modal.style.display === 'block') {
+                if (e.key === 'ArrowLeft') changeSlide(-1);
+                if (e.key === 'ArrowRight') changeSlide(1);
+                if (e.key === 'Escape') modal.style.display = 'none';
+            }
+        });
+
+        // 滑动控制（移动端）
+        let touchStartX = 0;
+        modal.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+        }, false);
+
+        modal.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > 50) {
+                changeSlide(diff > 0 ? 1 : -1);
+            }
+        }, false);
+    });
+</script>
 </body>
 </html>
